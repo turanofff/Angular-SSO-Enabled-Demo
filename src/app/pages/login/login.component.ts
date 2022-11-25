@@ -66,7 +66,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     const left = Math.round(window.innerWidth / 2 - width / 2);
   
     return window.open(
-      'http://localhost:3000/login',
+      environment.ssoEndpoint,
       '_blank',
       `left=${left},top=${top},width=${width},height=${height},resizable,scrollbars=yes,status=1`
     );
@@ -94,7 +94,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   /** Starts authentication session using SSO */
   private loginWithSSO(redirect?: boolean): void {
     if (redirect) {
-      window.location.assign('http://localhost:3000/login');
+      window.location.assign(environment.ssoEndpoint);
     } else {
       window.removeEventListener('message', this.boundMessageHandler);
       this.openPopup();
