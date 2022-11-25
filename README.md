@@ -6,7 +6,7 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4400/`. The app will automatically reload if you change any of the source files.
 
-SSO Enabled email need to be configured in environment.ts otherwise SSO Authentication won't start. 
+SSO Enabled email need to be configured in `environment.ts` otherwise SSO Authentication won't start. 
 
 `adminUser` - is for SSO enabled email (when prompted will take you to `ssoEndpoint`)
 
