@@ -105,6 +105,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   /** A call that mocks the successful login process */
   private doLogin(username: string): void {
+    this.stateService.resetStates();
     this.accountService.saveUsername(username);
     this.router.navigate(['/welcome'])
   }

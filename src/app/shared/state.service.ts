@@ -10,6 +10,11 @@ export class StateService {
     return window.crypto;
   } 
 
+  public resetStates(): void {
+    localStorage.removeItem('saml_state');
+    localStorage.removeItem('saml_verifier');
+  }
+
   public getState(is: 'new' | 'saved'): string | null {
     if (is === 'new'){
       const state = createRandomString();
