@@ -1,11 +1,14 @@
+export const urlEncodeB64 = (input: string) => {
+  const b64Chars: { [index: string]: string } = { '+': '-', '/': '_', '=': '.' };
+  return input.replace(/[+/=]/g, (m: string) => b64Chars[m]);
+};
+
+
 export const sha256 = (input:any) => {
   const buf = new TextEncoder().encode(input);
   return crypto.subtle.digest('SHA-256', buf).then((hashBuffer) => {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray
-      .map((bytes) => bytes.toString(16).padStart(2, '0'))
-      .join('');
-    return hashHex;
+    return window.btoa(String.fromCharCode(...hashArray));
   });
 }
 

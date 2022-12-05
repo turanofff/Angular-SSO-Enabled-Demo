@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { createRandomString, sha256 } from 'src/app/shared/utils';
+import { createRandomString, sha256, urlEncodeB64 } from 'src/app/shared/utils';
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +25,9 @@ export class StateService {
       const code_verifier = createRandomString();
       localStorage.setItem('saml_verifier', code_verifier);
       const code_challenge = await sha256(code_verifier);
-      return code_challenge;
+      // Some characters in Base64 are not URL safe so we need to encode them
+      // i.e. [+] becomes [-] then [/] becomes [_] and finally [=] becomes [.]
+      return urlEncodeB64(code_challenge);
     } else {
       return localStorage.getItem('saml_verifier');
     }
