@@ -14,10 +14,10 @@ export const sha256 = (input:any) => {
 
 export const createRandomString = () => {
   const charset =
-    '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_~.';
+    '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
   let random = '';
   const randomValues = Array.from(
-    window.crypto.getRandomValues(new Uint8Array(43))
+    window.crypto.getRandomValues(new Uint8Array(64))
   );
   randomValues.forEach(v => (random += charset[v % charset.length]));
   return random;
