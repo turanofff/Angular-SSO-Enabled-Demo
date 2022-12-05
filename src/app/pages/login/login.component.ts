@@ -1,8 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject } from 'rxjs';
+import { first, Subject } from 'rxjs';
 import { AccountService } from 'src/app/shared/account.service';
+import { StateService } from 'src/app/shared/state.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -18,6 +19,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     private formBuilder: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
+    private stateService: StateService,
   ) { 
     this.boundMessageHandler = this.receiveMessage.bind(this);
   }
@@ -48,36 +50,52 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   /** For performing login if query params contain access_token */
-  private handleQueryParamBasedLogin() {
+  private async handleQueryParamBasedLogin() {
     // get the params from the url
-    const access_token = this.route.snapshot.queryParamMap.get('access_token');
+    const auth_code = this.route.snapshot.queryParamMap.get('auth_code');
+    const state = this.route.snapshot.queryParamMap.get('state');
+    const code_verifier = await this.stateService.getChallenge('saved');
 
-    if (access_token) {
-      const accountObject = this.parseJWT(access_token);
-      this.doLogin(accountObject?.custom?.email);
+    if (auth_code && code_verifier && state && this.stateService.getState('saved') === state) {
+      this.accountService.obtainToken(auth_code, code_verifier).pipe(
+        first(),
+      ).subscribe((response: any) => {
+        const accountObject = this.parseJWT(response.access_token);
+        this.doLogin(accountObject?.custom?.email);
+      })
     }
   }
 
   /** Creates popup window with authorization request to the backend */
-  private openPopup(): Window | null {
+  private async openPopup(): Promise<Window | null> {
     const width = 400;
     const height = 600;
     const top = Math.round(window.innerHeight / 2 - height / 2);
     const left = Math.round(window.innerWidth / 2 - width / 2);
-  
+
+    const state = this.stateService.getState('new');
+    const challenge_code = await this.stateService.getChallenge('new');
+
     return window.open(
-      environment.ssoEndpoint,
+      `${environment.ssoLoginEndpoint}?state=${state}&challenge_code=${challenge_code}`,
       '_blank',
       `left=${left},top=${top},width=${width},height=${height},resizable,scrollbars=yes,status=1`
     );
   }
 
   /** Event handler to receive message with access_token from popup */
-  private receiveMessage(event:any): void {
-    const access_token = event?.data?.access_token;
-    if(access_token) {
-      const accountObject = this.parseJWT(access_token);
-      this.doLogin(accountObject?.custom?.email);
+  private async receiveMessage(event:any) {
+    const auth_code = event?.data?.auth_code;
+    const state = event?.data?.state;
+    const code_verifier = await this.stateService.getChallenge('saved');
+
+    if (auth_code && code_verifier && state && this.stateService.getState('saved') === state) {
+      this.accountService.obtainToken(auth_code, code_verifier).pipe(
+        first(),
+      ).subscribe((response: any) => {
+        const accountObject = this.parseJWT(response.access_token);
+        this.doLogin(accountObject?.custom?.email);
+      })
     } else {
       this.errorBanner = true;
       this.errorText = 'Unable to sign in with google account';
@@ -92,9 +110,11 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   /** Starts authentication session using SSO */
-  private loginWithSSO(redirect?: boolean): void {
+  private async loginWithSSO(redirect?: boolean) {
+    const state = this.stateService.getState('new');
+    const challenge_code = await this.stateService.getChallenge('new');
     if (redirect) {
-      window.location.assign(environment.ssoEndpoint);
+      window.location.assign(`${environment.ssoLoginEndpoint}?state=${state}&challenge_code=${challenge_code}`);
     } else {
       window.removeEventListener('message', this.boundMessageHandler);
       this.openPopup();
