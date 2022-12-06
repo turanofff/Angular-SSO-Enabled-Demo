@@ -56,6 +56,9 @@ export class LoginComponent implements OnInit, OnDestroy {
     const state = this.route.snapshot.queryParamMap.get('state');
     const code_verifier = await this.stateService.getChallenge('saved');
 
+    // Checking if all the required parameters are present. Additionally, check that
+    // the state is matching the one generated at the beginning of the sign on sequence
+    // in order to prevent CSRF attacks.
     if (auth_code && code_verifier && state && this.stateService.getState('saved') === state) {
       this.accountService.obtainToken(auth_code, code_verifier).pipe(
         first(),
