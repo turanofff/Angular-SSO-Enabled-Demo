@@ -1,5 +1,5 @@
 export const urlEncodeB64 = (input: string) => {
-  const b64Chars: { [index: string]: string } = { '+': '-', '/': '_', '=': '.' };
+  const b64Chars: { [index: string]: string } = { '+': '-', '/': '_', '=': '' };
   return input.replace(/[+/=]/g, (m: string) => b64Chars[m]);
 };
 
