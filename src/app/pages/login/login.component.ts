@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { first, Subject } from 'rxjs';
 import { AccountService } from 'src/app/shared/account.service';
 import { StateService } from 'src/app/shared/state.service';
+import { parseJWTpayload } from 'src/app/shared/utils';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -43,12 +44,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.onDestroySubj.complete();
   }
 
-  /** For parsing JWT payload */
-  private parseJWT(access_token: string): any {
-    const jwtPayload = access_token.split('.')[1];
-    return JSON.parse(decodeURIComponent(atob(jwtPayload)));
-  }
-
   /** For performing login if query params contain access_token */
   private async handleQueryParamBasedLogin() {
     // get the params from the url
@@ -63,7 +58,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.accountService.obtainToken(auth_code, code_verifier).pipe(
         first(),
       ).subscribe((response: any) => {
-        const accountObject = this.parseJWT(response.access_token);
+        const accountObject = parseJWTpayload(response.access_token);
         this.doLogin(accountObject?.custom?.email);
       })
     }
@@ -96,7 +91,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.accountService.obtainToken(auth_code, code_verifier).pipe(
         first(),
       ).subscribe((response: any) => {
-        const accountObject = this.parseJWT(response.access_token);
+        const accountObject = parseJWTpayload(response.access_token);
         this.doLogin(accountObject?.custom?.email);
       })
     } else {

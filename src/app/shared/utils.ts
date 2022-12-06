@@ -23,3 +23,7 @@ export const createRandomString = () => {
   return random;
 };
 
+export const parseJWTpayload = (access_token: string): any => {
+  const jwtPayload = access_token.split('.')[1];
+  return JSON.parse(decodeURIComponent(atob(jwtPayload)));
+}
