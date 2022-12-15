@@ -6,8 +6,6 @@ export const environment = {
   production: false,
   ssoLoginEndpoint: '',
   ssoTokenEndpoint: '',
-  regularUser: '',
-  adminUser: ''
 };
 
 /*
